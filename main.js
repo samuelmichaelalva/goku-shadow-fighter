@@ -1,6 +1,6 @@
 import './style.css'
 import { Fighter } from './classes.js'
-import { rectangularCollision, determineWinner, decreaseTimer, timerId } from './utils.js'
+import { rectangularCollision, determineWinner, decreaseTimer, timerId, timer } from './utils.js'
 
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
@@ -41,6 +41,46 @@ player.draw(c)
 enemy.draw(c)
 
 let gameStarted = false
+
+const btnRestart = document.getElementById('btnRestart');
+
+function resetGame() {
+  // Reset health
+  player.health = player.maxHealth;
+  enemy.health = enemy.maxHealth;
+  document.querySelector('#playerHealth').style.width = '100%';
+  document.querySelector('#enemyHealth').style.width = '100%';
+  // Reset positions
+  player.position = { x: 50, y: 0 };
+  player.velocity = { x: 0, y: 0 };
+  enemy.position = { x: 824, y: 100 };
+  enemy.velocity = { x: 0, y: 0 };
+  // Reset flags
+  player.isDead = false;
+  enemy.isDead = false;
+  player.isDodging = false;
+  enemy.isDodging = false;
+  // Reset timer
+  timer = 60;
+  document.querySelector('#timer').innerHTML = timer;
+  // Hide end overlay
+  document.querySelector('#displayText').style.display = 'none';
+  // Hide restart button, show start button again if needed
+  btnRestart.style.display = 'none';
+  document.getElementById('btnStart').style.display = 'block';
+  // Restart game loop
+  gameStarted = true;
+  decreaseTimer(player, enemy);
+  animate();
+}
+
+btnRestart.addEventListener('click', () => {
+  // Hide start screen if visible
+  const startScreen = document.getElementById('startScreen');
+  if (startScreen) startScreen.style.display = 'none';
+  resetGame();
+});
+
 
 document.getElementById('btnStart').addEventListener('click', () => {
   document.getElementById('startScreen').style.display = 'none'
@@ -119,7 +159,7 @@ function animate() {
   ) {
     player.hasHit = true
     enemy.health -= getDamage(player.attackType)
-    document.querySelector('#enemyHealth').style.width = Math.max(enemy.health, 0) + '%'
+    document.querySelector('#enemyHealth').style.width = Math.max((enemy.health / enemy.maxHealth) * 100, 0) + '%'
   }
 
   // Detect for collision & player gets hit
@@ -129,14 +169,17 @@ function animate() {
   ) {
     enemy.hasHit = true
     player.health -= getDamage(enemy.attackType)
-    document.querySelector('#playerHealth').style.width = Math.max(player.health, 0) + '%'
+    document.querySelector('#playerHealth').style.width = Math.max((player.health / player.maxHealth) * 100, 0) + '%'
   }
 
   // End game based on health
   if (enemy.health <= 0 || player.health <= 0) {
     if (enemy.health <= 0) enemy.isDead = true
     if (player.health <= 0) player.isDead = true
-    determineWinner({ player, enemy, timerId })
+  // Show restart button when game ends
+  const restartBtn = document.getElementById('btnRestart');
+  if (restartBtn) restartBtn.style.display = 'block';
+
   }
 }
 

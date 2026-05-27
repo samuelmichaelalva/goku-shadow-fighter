@@ -31,7 +31,8 @@ export class Sprite {
 export class Fighter extends Sprite {
   constructor({ position, velocity, color = 'red', offset, isPlayer = false }) {
     super({ position, velocity, color, offset, isPlayer })
-    this.health = 100
+    this.maxHealth = 200
+    this.health = this.maxHealth
     this.attackType = null // 'punch', 'kick', 'roundhouse'
     this.hasHit = false
     this.isDodging = false

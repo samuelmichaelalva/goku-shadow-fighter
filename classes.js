@@ -203,6 +203,8 @@ export class Fighter extends Sprite {
   }
 
   attack(type = 'punch') {
+    if (this.attackType || this.isDead) return
+
     this.attackType = type
     this.hasHit = false
     this.attackStartTime = Date.now()

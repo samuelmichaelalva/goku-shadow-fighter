@@ -32,6 +32,8 @@ const keys = {
   ArrowLeft: { pressed: false }
 }
 
+const pressedActionKeys = new Set()
+
 // Initial static draw before game starts
 c.fillStyle = 'black'
 c.fillRect(0, 0, canvas.width, canvas.height)
@@ -85,6 +87,7 @@ function resetGame() {
   clearTimeout(timerId)
   if (animationFrameId) cancelAnimationFrame(animationFrameId)
   gameOver = false
+  pressedActionKeys.clear()
   player.health = player.maxHealth;
   enemy.health = enemy.maxHealth;
   document.querySelector('#playerHealth').style.width = '100%';
@@ -217,6 +220,7 @@ function animate() {
 // Desktop Controls
 window.addEventListener('keydown', (event) => {
   if (gameStarted && !player.isDead && !enemy.isDead) {
+    const actionKey = event.key.toLowerCase()
     switch (event.key) {
       case 'd':
       case 'ArrowRight':
@@ -228,21 +232,31 @@ window.addEventListener('keydown', (event) => {
         break
       case 'w':
       case 'ArrowUp':
+        if (pressedActionKeys.has(actionKey)) break
+        pressedActionKeys.add(actionKey)
         if (player.position.y >= canvas.height - 96 - player.height) {
           player.velocity.y = -15
         }
         break
       case 's':
       case 'ArrowDown':
+        if (pressedActionKeys.has(actionKey)) break
+        pressedActionKeys.add(actionKey)
         player.dodge()
         break
       case ' ':
+        if (pressedActionKeys.has(actionKey)) break
+        pressedActionKeys.add(actionKey)
         player.attack('punch')
         break
       case 'e':
+        if (pressedActionKeys.has(actionKey)) break
+        pressedActionKeys.add(actionKey)
         player.attack('kick')
         break
       case 'r':
+        if (pressedActionKeys.has(actionKey)) break
+        pressedActionKeys.add(actionKey)
         player.attack('roundhouse')
         break
     }
@@ -250,6 +264,8 @@ window.addEventListener('keydown', (event) => {
 })
 
 window.addEventListener('keyup', (event) => {
+  pressedActionKeys.delete(event.key.toLowerCase())
+
   switch (event.key) {
     case 'd':
     case 'ArrowRight':
@@ -260,6 +276,12 @@ window.addEventListener('keyup', (event) => {
       keys.a.pressed = false
       break
   }
+})
+
+window.addEventListener('blur', () => {
+  pressedActionKeys.clear()
+  keys.a.pressed = false
+  keys.d.pressed = false
 })
 
 // Mobile Controls

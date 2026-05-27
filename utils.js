@@ -22,6 +22,11 @@ export function determineWinner({ player, enemy, timerId }) {
 export let timer = 60
 export let timerId
 
+export function setTimer(value) {
+  timer = value
+  document.querySelector('#timer').innerHTML = timer
+}
+
 export function decreaseTimer(player, enemy) {
   if (timer > 0) {
     timerId = setTimeout(() => decreaseTimer(player, enemy), 1000)

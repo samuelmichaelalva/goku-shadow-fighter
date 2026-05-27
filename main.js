@@ -1,6 +1,6 @@
 import './style.css'
 import { Fighter } from './classes.js'
-import { rectangularCollision, determineWinner, decreaseTimer, timerId, timer } from './utils.js'
+import { rectangularCollision, determineWinner, decreaseTimer, timerId, timer, setTimer } from './utils.js'
 
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
@@ -61,8 +61,7 @@ function resetGame() {
   player.isDodging = false;
   enemy.isDodging = false;
   // Reset timer
-  timer = 60;
-  document.querySelector('#timer').innerHTML = timer;
+  setTimer(60);
   // Hide end overlay
   document.querySelector('#displayText').style.display = 'none';
   // Hide restart button, show start button again if needed

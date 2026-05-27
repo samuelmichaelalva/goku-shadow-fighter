@@ -27,14 +27,15 @@ export function setTimer(value) {
   document.querySelector('#timer').innerHTML = timer
 }
 
-export function decreaseTimer(player, enemy) {
+export function decreaseTimer(player, enemy, onComplete) {
   if (timer > 0) {
-    timerId = setTimeout(() => decreaseTimer(player, enemy), 1000)
+    timerId = setTimeout(() => decreaseTimer(player, enemy, onComplete), 1000)
     timer--
     document.querySelector('#timer').innerHTML = timer
   }
 
   if (timer === 0) {
-    determineWinner({ player, enemy, timerId })
+    if (onComplete) onComplete()
+    else determineWinner({ player, enemy, timerId })
   }
 }

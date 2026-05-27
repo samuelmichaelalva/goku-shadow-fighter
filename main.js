@@ -1,6 +1,6 @@
 import './style.css'
 import { Fighter } from './classes.js'
-import { rectangularCollision, determineWinner, decreaseTimer, timerId, timer, setTimer } from './utils.js'
+import { rectangularCollision, decreaseTimer, timerId, setTimer } from './utils.js'
 
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
@@ -41,56 +41,89 @@ player.draw(c)
 enemy.draw(c)
 
 let gameStarted = false
+let gameOver = false
+let animationFrameId = null
 
-const btnRestart = document.getElementById('btnRestart');
+const startScreen = document.getElementById('startScreen')
+const btnStart = document.getElementById('btnStart')
+const btnRestart = document.getElementById('btnRestart')
+const gameOverModal = document.getElementById('gameOverModal')
+const gameOverTitle = document.getElementById('gameOverTitle')
+const orientationOverlay = document.getElementById('orientationOverlay')
+const mobileQuery = window.matchMedia('(hover: none), (pointer: coarse), (max-width: 768px)')
+
+function syncDeviceUi() {
+  const isMobile = mobileQuery.matches
+  document.body.classList.toggle('is-mobile', isMobile)
+  orientationOverlay.classList.toggle('is-visible', isMobile && window.innerHeight > window.innerWidth)
+}
+
+async function lockLandscapeIfPossible() {
+  if (!mobileQuery.matches || !screen.orientation?.lock) return
+  try {
+    await screen.orientation.lock('landscape')
+  } catch {
+    // Some mobile browsers only allow orientation changes through the device setting.
+  }
+}
+
+function getWinnerText() {
+  if (player.health === enemy.health) return 'It is a Tie'
+  return player.health > enemy.health ? 'Player Won' : 'Opponent Won'
+}
+
+function endGame() {
+  if (gameOver) return
+  gameOver = true
+  gameStarted = false
+  clearTimeout(timerId)
+  gameOverTitle.innerHTML = getWinnerText()
+  gameOverModal.classList.add('is-visible')
+}
 
 function resetGame() {
-  // Reset health
+  clearTimeout(timerId)
+  if (animationFrameId) cancelAnimationFrame(animationFrameId)
+  gameOver = false
   player.health = player.maxHealth;
   enemy.health = enemy.maxHealth;
   document.querySelector('#playerHealth').style.width = '100%';
   document.querySelector('#enemyHealth').style.width = '100%';
-  // Reset positions
   player.position = { x: 50, y: 0 };
   player.velocity = { x: 0, y: 0 };
   enemy.position = { x: 824, y: 100 };
   enemy.velocity = { x: 0, y: 0 };
-  // Reset flags
   player.isDead = false;
   enemy.isDead = false;
   player.isDodging = false;
   enemy.isDodging = false;
-  // Reset timer
+  player.attackType = null;
+  enemy.attackType = null;
+  player.hasHit = false;
+  enemy.hasHit = false;
   setTimer(60);
-  // Hide end overlay
   document.querySelector('#displayText').style.display = 'none';
-  // Hide restart button, show start button again if needed
-  btnRestart.style.display = 'none';
-  document.getElementById('btnStart').style.display = 'block';
-  // Restart game loop
+  gameOverModal.classList.remove('is-visible');
   gameStarted = true;
-  decreaseTimer(player, enemy);
+  decreaseTimer(player, enemy, endGame);
   animate();
 }
 
 btnRestart.addEventListener('click', () => {
-  // Hide start screen if visible
-  const startScreen = document.getElementById('startScreen');
-  if (startScreen) startScreen.style.display = 'none';
+  startScreen.style.display = 'none';
   resetGame();
 });
 
 
-document.getElementById('btnStart').addEventListener('click', () => {
-  document.getElementById('startScreen').style.display = 'none'
-  gameStarted = true
-  decreaseTimer(player, enemy)
-  animate()
+btnStart.addEventListener('click', async () => {
+  await lockLandscapeIfPossible()
+  startScreen.style.display = 'none'
+  resetGame()
 })
 
 function animate() {
   if (!gameStarted) return;
-  window.requestAnimationFrame(animate)
+  animationFrameId = window.requestAnimationFrame(animate)
   c.fillStyle = 'black'
   c.fillRect(0, 0, canvas.width, canvas.height)
 
@@ -175,10 +208,7 @@ function animate() {
   if (enemy.health <= 0 || player.health <= 0) {
     if (enemy.health <= 0) enemy.isDead = true
     if (player.health <= 0) player.isDead = true
-  // Show restart button when game ends
-  const restartBtn = document.getElementById('btnRestart');
-  if (restartBtn) restartBtn.style.display = 'block';
-
+    endGame()
   }
 }
 
@@ -186,7 +216,7 @@ function animate() {
 
 // Desktop Controls
 window.addEventListener('keydown', (event) => {
-  if (!player.isDead && !enemy.isDead) {
+  if (gameStarted && !player.isDead && !enemy.isDead) {
     switch (event.key) {
       case 'd':
       case 'ArrowRight':
@@ -241,18 +271,23 @@ const btnAttack = document.getElementById('btnAttack')
 const btnKick = document.getElementById('btnKick')
 const btnRoundhouse = document.getElementById('btnRoundhouse')
 
-btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); keys.a.pressed = true })
+btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); if (gameStarted) keys.a.pressed = true })
 btnLeft.addEventListener('touchend', (e) => { e.preventDefault(); keys.a.pressed = false })
-btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); keys.d.pressed = true })
+btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); if (gameStarted) keys.d.pressed = true })
 btnRight.addEventListener('touchend', (e) => { e.preventDefault(); keys.d.pressed = false })
 
 btnJump.addEventListener('touchstart', (e) => { 
   e.preventDefault(); 
-  if (player.position.y >= canvas.height - 96 - player.height) {
+  if (gameStarted && player.position.y >= canvas.height - 96 - player.height) {
     player.velocity.y = -15
   }
 })
-btnDodge.addEventListener('touchstart', (e) => { e.preventDefault(); player.dodge() })
-btnAttack.addEventListener('touchstart', (e) => { e.preventDefault(); player.attack('punch') })
-btnKick.addEventListener('touchstart', (e) => { e.preventDefault(); player.attack('kick') })
-btnRoundhouse.addEventListener('touchstart', (e) => { e.preventDefault(); player.attack('roundhouse') })
+btnDodge.addEventListener('touchstart', (e) => { e.preventDefault(); if (gameStarted) player.dodge() })
+btnAttack.addEventListener('touchstart', (e) => { e.preventDefault(); if (gameStarted) player.attack('punch') })
+btnKick.addEventListener('touchstart', (e) => { e.preventDefault(); if (gameStarted) player.attack('kick') })
+btnRoundhouse.addEventListener('touchstart', (e) => { e.preventDefault(); if (gameStarted) player.attack('roundhouse') })
+
+syncDeviceUi()
+mobileQuery.addEventListener?.('change', syncDeviceUi)
+window.addEventListener('resize', syncDeviceUi)
+window.addEventListener('orientationchange', syncDeviceUi)

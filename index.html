@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Goku Shadow Fighter</title>
+    <link rel="stylesheet" href="./style.css">
+  </head>
+  <body>
+    <!-- Game Container -->
+    <div class="game-container">
+      
+      <!-- Start Screen / Controls Guide -->
+      <div id="startScreen" class="overlay">
+        <h2>Goku Shadow Fighter</h2>
+        <div class="controls-guide">
+          <h3>Desktop Controls</h3>
+          <p><b>A / D</b> : Move Left / Right</p>
+          <p><b>W</b> : Jump</p>
+          <p><b>S</b> : Dodge</p>
+          <p><b>Space</b> : Punch (10 dmg)</p>
+          <p><b>E</b> : Kick (15 dmg)</p>
+          <p><b>R</b> : 360 Roundhouse (25 dmg)</p>
+          <br>
+          <h3>Mobile Controls</h3>
+          <p>Use the on-screen buttons to Move, Jump, Dodge, and Attack.</p>
+        </div>
+        <button id="btnStart">Start Game</button>
+      </div>
+
+      <!-- UI Layer -->
+      <div class="ui-layer">
+        <!-- Health Bars -->
+        <div class="health-bar-container">
+          <!-- Player Health -->
+          <div class="health-bar-wrapper">
+            <div class="health-bar-background"></div>
+            <div class="health-bar" id="playerHealth"></div>
+          </div>
+          <!-- Timer -->
+          <div class="timer" id="timer">60</div>
+          <!-- Enemy Health -->
+          <div class="health-bar-wrapper">
+            <div class="health-bar-background"></div>
+            <div class="health-bar" id="enemyHealth"></div>
+          </div>
+        </div>
+        
+        <!-- Game Over Text -->
+        <div id="displayText">Tie</div>
+      </div>
+
+      <!-- The Canvas -->
+      <canvas></canvas>
+
+      <!-- Mobile Controls Layer -->
+      <div class="mobile-controls">
+        <div class="d-pad">
+          <button id="btnLeft">⬅️</button>
+          <button id="btnRight">➡️</button>
+        </div>
+        <div class="action-pad" style="display:flex; flex-direction:column; align-items:flex-end;">
+          <div style="margin-bottom: 5px;">
+             <button id="btnJump">⬆️</button>
+             <button id="btnDodge">🛡️</button>
+          </div>
+          <div>
+             <button id="btnAttack">👊</button>
+             <button id="btnKick">🦵</button>
+             <button id="btnRoundhouse">🌪️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

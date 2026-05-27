@@ -56,8 +56,10 @@ const mobileQuery = window.matchMedia('(hover: none), (pointer: coarse), (max-wi
 
 function syncDeviceUi() {
   const isMobile = mobileQuery.matches
+  const isPortrait = window.innerHeight > window.innerWidth
   document.body.classList.toggle('is-mobile', isMobile)
-  orientationOverlay.classList.toggle('is-visible', isMobile && window.innerHeight > window.innerWidth)
+  document.body.classList.toggle('is-mobile-portrait', isMobile && isPortrait)
+  orientationOverlay.classList.remove('is-visible')
 }
 
 async function lockLandscapeIfPossible() {

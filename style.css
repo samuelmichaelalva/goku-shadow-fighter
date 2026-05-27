@@ -11,7 +11,9 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
+  width: 100dvw;
   overflow: hidden;
 }
 
@@ -293,15 +295,36 @@ canvas {
 @media (hover: none), (pointer: coarse), (max-width: 768px) {
   body {
     align-items: center;
+    height: 100svh;
+    width: 100svw;
   }
 
   .game-container {
-    width: 100vw;
-    height: min(100vh, 56.25vw);
+    position: fixed;
+    inset: 0;
+    width: 100svw;
+    height: 100svh;
+    max-width: none;
+    max-height: none;
+  }
+
+  .is-mobile-portrait .game-container {
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    width: 100svh;
+    height: 100svw;
+    transform: translate(-50%, -50%) rotate(90deg);
+    transform-origin: center;
+  }
+
+  canvas {
+    aspect-ratio: auto;
   }
 
   .ui-layer {
-    padding: clamp(8px, 2vw, 14px);
+    padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) 8px max(10px, env(safe-area-inset-left));
   }
 
   .health-bar-wrapper {
@@ -318,6 +341,9 @@ canvas {
 
   .mobile-controls {
     display: flex;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    left: max(10px, env(safe-area-inset-left));
+    right: max(10px, env(safe-area-inset-right));
   }
 
   .overlay h2 {
